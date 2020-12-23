@@ -2,8 +2,9 @@ import pandas as pd
 from glob import glob
 import numpy as np
 from ml_tools.paths import base_name_from_path
+import sys
 
-species_files = glob("./species_separated/*.csv")
+species_files = glob(sys.argv[1] + "/*.csv")
 species_names = [base_name_from_path(x) for x in species_files]
 
 # Load the checklist ids
