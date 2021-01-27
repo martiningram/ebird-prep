@@ -7,10 +7,12 @@ args <- commandArgs(trailingOnly = TRUE)
 bbs_csv <- args[1]
 ebird_csv <- args[2]
 
-bbs_csv_target <- args[3]
-ebird_csv_target <- args[4]
+higher_res_land_cover_raster <- args[3]
 
-cov_csv_target <- args[5]
+bbs_csv_target <- args[4]
+ebird_csv_target <- args[5]
+
+cov_csv_target <- args[6]
 
 set.seed(2)
 
@@ -60,12 +62,23 @@ po_fold_ids <- fold_ids[combined$data_type == 'PO']
 # Take the opportunity to also fetch the covariates
 combined_latlon <- st_transform(combined_sf, crs=4326)
 
-covs <- getData("worldclim", var="bio", res=10)
+# covs <- getData("worldclim", var="bio", res=10)
+covs <- stack('./env_raster_stack.tif')
+cov_names <- read.csv('./env_raster_stack_names.csv', stringsAsFactors = FALSE)$x
+names(covs) <- cov_names
+
 cell_nums <- cellFromXY(covs, st_coordinates(combined_latlon))
 unique_nums <- unique(cell_nums)
 unique_covs <- raster::extract(covs, unique_nums)
 cov_df <- data.frame(unique_covs)
 cov_df$cell <- unique_nums
+
+land_cover <- raster(higher_res_land_cover_raster)
+new_proj_str <- '+proj=lcc +lat_1=37 +lat_2=39.5 +lat_0=36 +lon_0=-79.5 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs'
+land_cover_projected <- projectRaster(land_cover, crs = new_proj_str, method = 'ngb')
+higher_res_land_cover <- raster::extract(land_cover_projected, ebird_xy[, c('X', 'Y')])
+
+ebird_df$land_cover <- higher_res_land_cover
 
 cell_lat_lon <- xyFromCell(covs, unique_nums)
 cov_df <- cbind(cov_df, cell_lat_lon)
