@@ -1,10 +1,11 @@
 SAMPLING_FILE=/home/martin/data/ebird-basic-dataset/june_2019/all_june_2019_zero_filled_sampling.txt
 SPECIES_FOLDER=/home/martin/data/ebird-basic-dataset/june_2019/species_separated/
-BBS_FILE=/home/martin/data/bbs_2020_release/processing/route_pa_2019.csv
 US_SHAPEFILE=./us-shapefile/us_mainland.shp
-LAND_COVER_RASTER=/home/martin/data/land_cover/downsampled_raster_1.5k.tif
+LAND_COVER_RASTER=./downsampled_raster_1.5k.tif
+BBS_FILE=/home/martin/data/bbs_2020_release/processing/route_pa_2019.csv
 
-all: bbs_with_folds.csv checklists_with_folds.csv
+
+all: bbs_with_folds.csv checklists_with_folds.csv all_pa.csv
 
 checklists_filtered.csv: $(SAMPLING_FILE) prepare_checklists.py
 	python prepare_checklists.py $(SAMPLING_FILE) $@
