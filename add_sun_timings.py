@@ -57,35 +57,41 @@ for sample_date, row in zip(tqdm(pandas_dates_utc), obs_data.itertuples()):
     times = pd.to_datetime(pd.Series(t.utc_iso()))
     types = np.select([y == 0, y == 1], ["sunset", "sunrise"])
 
-    if is_up:
+    time_to_sunset = (times[types == "sunset"] - sample_date) / pd.Timedelta("1 hour")
+    time_to_next_sunset = time_to_sunset[time_to_sunset > 0].sort_values().iloc[0]
+    time_from_sunrise = (sample_date - times[types == "sunrise"]) / pd.Timedelta(
+        "1 hour"
+    )
+    time_from_last_sunrise = (
+        time_from_sunrise[time_from_sunrise > 0].sort_values().iloc[0]
+    )
 
-        time_to_sunset = (times[types == "sunset"] - sample_date) / pd.Timedelta(
-            "1 hour"
-        )
-        time_to_next_sunset = time_to_sunset[time_to_sunset > 0].sort_values().iloc[0]
-        time_from_sunrise = (sample_date - times[types == "sunrise"]) / pd.Timedelta(
-            "1 hour"
-        )
-        time_from_last_sunrise = (
-            time_from_sunrise[time_from_sunrise > 0].sort_values().iloc[0]
-        )
+    time_to_next_sunrise = (times[types == "sunrise"] - sample_date) / pd.Timedelta(
+        "1 hour"
+    )
+    time_to_next_sunrise = (
+        time_to_next_sunrise[time_to_next_sunrise > 0].sort_values().iloc[0]
+    )
 
-    else:
-
-        # Just put in nones for nighttime
-        time_to_next_sunset = None
-        time_from_last_sunrise = None
+    time_from_last_sunset = (sample_date - times[types == "sunset"]) / pd.Timedelta(
+        "1 hour"
+    )
+    time_from_last_sunset = (
+        time_from_last_sunset[time_from_last_sunset > 0].sort_values().iloc[0]
+    )
 
     results.append(
         {
             "time_to_next_sunset": time_to_next_sunset,
+            "time_to_next_sunrise": time_to_next_sunrise,
             "time_from_last_sunrise": time_from_last_sunrise,
+            "time_from_last_sunset": time_from_last_sunset,
+            "is_up": is_up,
         }
     )
 
 result_df = pd.DataFrame(results, index=obs_data.index)
 
-obs_data["time_to_next_sunset"] = result_df["time_to_next_sunset"]
-obs_data["time_from_last_sunrise"] = result_df["time_from_last_sunrise"]
+obs_data = pd.concat([obs_data, result_df], axis=1)
 
 obs_data.to_csv("checklists_with_sun_info.csv")
