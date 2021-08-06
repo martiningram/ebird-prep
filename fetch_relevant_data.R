@@ -6,7 +6,6 @@ auk_set_ebd_path('/data/gpfs/projects/punim0592/ebird-basic-dataset/parallel_dow
 ebd_file <- '/data/gpfs/projects/punim0592/ebird-basic-dataset/parallel_download_attempt/dataset/ebd_US_relAug-2020.txt'
 sampling_file <- '/data/gpfs/projects/punim0592/ebird-basic-dataset/parallel_download_attempt/sampling_info/ebd_sampling_relAug-2020.txt'
 
-# ebd <- system.file("extdata/ebd-sample.txt", package='auk') %>% auk_ebd()
 ebd <- auk_ebd(ebd_file, file_sampling = sampling_file)
 
 output_file <- '/data/gpfs/projects/punim0592/ebird-basic-dataset/parallel_download_attempt/full_dataset/june_2019_only/all_june_2019_zero_filled.txt'
